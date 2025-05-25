@@ -37,7 +37,7 @@ contract InvariaOpenInvariantsTest is StdInvariant, Test {
         targetContract(address(handler));
     }
 
-    function invariant_protocolMustHaveMoreValueThanTotalSupply() public {
+    function invariant_protocolMustHaveMoreValueThanTotalSupply() public view {
         //dapetin total supply DSC dan total supply collateral
         uint256 totalSupplyDSC = dsc.totalSupply();
         uint256 totalSupplyWETH = IERC20(weth).balanceOf(address(engine));

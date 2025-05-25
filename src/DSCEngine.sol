@@ -282,6 +282,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function _getAccountInformation(address user)
         private
+        view
         returns (uint256 totalDSCMinted, uint256 collateralValueInUSD)
     {
         totalDSCMinted = s_userMintedAmount[user];
@@ -292,7 +293,7 @@ contract DSCEngine is ReentrancyGuard {
      * return how close user get to liquidation
      * if user get below 1, the user liquidated
      */
-    function _healthFactor(address user) private returns (uint256) {
+    function _healthFactor(address user) private view returns (uint256) {
         (uint256 totalDSCMinted, uint256 collateralValueInUSD) = _getAccountInformation(user);
         return _calculateHealthFactor(totalDSCMinted, collateralValueInUSD);
     }
@@ -311,7 +312,7 @@ contract DSCEngine is ReentrancyGuard {
     *   1. check healthfactor (have enough collateral or not)
     *   2. revert if it doesnt
     */
-    function _revertIfHealthFactorBroken(address user) internal {
+    function _revertIfHealthFactorBroken(address user) internal view {
         if (_healthFactor(user) < MIN_HEALTH_FACTOR) {
             revert DSCEngine__BreaksHealthFactor(_healthFactor(user));
         }
@@ -320,13 +321,13 @@ contract DSCEngine is ReentrancyGuard {
     //////////////////////
     //public function  ///
     //////////////////////
-    function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public returns (uint256) {
+    function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_PRICE_FEED);
     }
 
-    function getAccountCollateralValue(address user) public returns (uint256 totalCollateralValueInUsd) {
+    function getAccountCollateralValue(address user) public view returns (uint256 totalCollateralValueInUsd) {
         //loop buat dapetin setiap collateral token, dapetin amount dari tiap token,
         //mapping ke harganya, dan dapetin harga dalam usd
         for (uint256 i = 0; i < s_collateralToken.length; i++) {
@@ -336,7 +337,7 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function getUsdValue(address token, uint256 amount) public returns (uint256) {
+    function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         //getting pricefeed from this function
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
@@ -345,6 +346,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getAccountInformation(address user)
         external
+        view
         returns (uint256 totalDSCMinted, uint256 collateralValueInUSD)
     {
         (totalDSCMinted, collateralValueInUSD) = _getAccountInformation(user);
